@@ -1,18 +1,19 @@
 # cloud-file-server
 
-cloud-file-server is a an application which provide files via http using configured connectors
+`cloud-file-server` is an application that serves files over HTTP using configured connectors (i.e. S3, file, dir)
 
-[![Build Status](https://travis-ci.org/codem8s/cloud-file-server.svg?branch=master)](https://travis-ci.org/codem8s/cloud-file-server)
-[![Docker Repository on Quay](https://quay.io/repository/codem8s/cloud-file-server/status "Docker Repository on Quay")](https://quay.io/repository/codem8s/cloud-file-server)
-[![Go Report Card](https://goreportcard.com/badge/github.com/codem8s/cloud-file-server)](https://goreportcard.com/report/github.com/codem8s/cloud-file-server)
-[![GoDoc](https://godoc.org/github.com/codem8s/cloud-file-server?status.svg "GoDoc Documentation")](https://godoc.org/github.com/codem8s/cloud-file-server)
+[![Build Status](https://travis-ci.org/VirtusLab/cloud-file-server.svg?branch=master)](https://travis-ci.org/VirtusLab/cloud-file-server)
+[![Docker Repository on Quay](https://quay.io/repository/VirtusLab/cloud-file-server/status "Docker Repository on Quay")](https://quay.io/repository/VirtusLab/cloud-file-server)
+[![Go Report Card](https://goreportcard.com/badge/github.com/VirtusLab/cloud-file-server)](https://goreportcard.com/report/github.com/VirtusLab/cloud-file-server)
+[![GoDoc](https://godoc.org/github.com/VirtusLab/cloud-file-server?status.svg "GoDoc Documentation")](https://godoc.org/github.com/VirtusLab/cloud-file-server)
 
 ## Connectors
-- AWS s3 bucket
+- [AWS S3 bucket](https://aws.amazon.com/s3/)
 - local directory
-- local single file
+- local file
 
 ## Run
+
     ./cloud-file-server --config example-config.yaml
     
 ## Example config
