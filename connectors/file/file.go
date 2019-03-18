@@ -10,9 +10,10 @@ import (
 	"path"
 	"strings"
 
+	"github.com/VirtusLab/cloud-file-server/config"
+	"github.com/VirtusLab/cloud-file-server/connectors"
+
 	"github.com/bugsnag/bugsnag-go/errors"
-	"github.com/codem8s/cloud-file-server/config"
-	"github.com/codem8s/cloud-file-server/connectors"
 )
 
 const (

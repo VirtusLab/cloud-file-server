@@ -1,16 +1,16 @@
 package main
 
 import (
+	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"flag"
-	"io/ioutil"
+	"github.com/VirtusLab/cloud-file-server/config"
+	mainhandler "github.com/VirtusLab/cloud-file-server/handlers"
 
-	"github.com/codem8s/cloud-file-server/config"
-	mainhandler "github.com/codem8s/cloud-file-server/handlers"
 	"github.com/gorilla/handlers"
 	"gopkg.in/yaml.v2"
 )

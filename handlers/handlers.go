@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/codem8s/cloud-file-server/config"
-	"github.com/codem8s/cloud-file-server/connectors"
-	"github.com/codem8s/cloud-file-server/connectors/directory"
-	"github.com/codem8s/cloud-file-server/connectors/file"
-	"github.com/codem8s/cloud-file-server/connectors/s3"
+	"github.com/VirtusLab/cloud-file-server/config"
+	"github.com/VirtusLab/cloud-file-server/connectors"
+	"github.com/VirtusLab/cloud-file-server/connectors/directory"
+	"github.com/VirtusLab/cloud-file-server/connectors/file"
+	"github.com/VirtusLab/cloud-file-server/connectors/s3"
 )
 
 const (

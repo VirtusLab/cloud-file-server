@@ -9,13 +9,14 @@ import (
 	"path"
 	"strings"
 
+	"github.com/VirtusLab/cloud-file-server/config"
+	"github.com/VirtusLab/cloud-file-server/connectors"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/bugsnag/bugsnag-go/errors"
-	"github.com/codem8s/cloud-file-server/config"
-	"github.com/codem8s/cloud-file-server/connectors"
 )
 
 const (
@@ -26,7 +27,7 @@ type s3Handler struct {
 	pathPrefix    string
 	bucketName    string
 	bucketFolders string
-	svc           *s3.S3
+	service       *s3.S3
 }
 
 // New creates a connector that provides files from AWS s3 bucket
@@ -55,7 +56,11 @@ func New(config config.ConnectorConfig) (http.Handler, error) {
 		bucketFolders = uriWithOutS3Prefix[index:]
 	}
 
-	svc := s3.New(session.New(), &aws.Config{
+	newSession, err := session.NewSession()
+	if err != nil {
+		return nil, err
+	}
+	service := s3.New(newSession, &aws.Config{
 		Region: &config.Region,
 	})
 
@@ -63,7 +68,7 @@ func New(config config.ConnectorConfig) (http.Handler, error) {
 		pathPrefix:    config.PathPrefix,
 		bucketName:    bucketName,
 		bucketFolders: bucketFolders,
-		svc:           svc,
+		service:       service,
 	}
 
 	return handler, nil
@@ -87,7 +92,7 @@ func (h *s3Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	var is304 bool
-	resp, err := h.svc.GetObject(input)
+	resp, err := h.service.GetObject(input)
 	if awsErr, ok := err.(awserr.Error); ok {
 		switch awsErr.Code() {
 		case s3.ErrCodeNoSuchKey:
@@ -140,6 +145,6 @@ func (h *s3Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			http.Error(rw, connectors.InternalServerErrorMessage, http.StatusInternalServerError)
 			return
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 }
