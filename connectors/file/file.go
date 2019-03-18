@@ -29,23 +29,23 @@ type fileHandler struct {
 // New creates a connector that provides the file from the directory
 func New(config config.ConnectorConfig) (http.Handler, error) {
 	if config.URI == "" {
-		return nil, errors.Errorf("URI parameter missing in connector %#v", config)
+		return nil, errors.Errorf("URI parameter missing in connector: %#v", config)
 	}
 	if !strings.HasPrefix(config.URI, prefixURI) {
-		return nil, errors.Errorf("Invalid URI parameter in connector %#v", config)
+		return nil, errors.Errorf("Invalid URI parameter in connector, expected '%s': %#v", prefixURI, config)
 	}
 
 	filePath := strings.Replace(config.URI, prefixURI, "", 1)
 	if filePath == "" {
-		return nil, errors.Errorf("File path is missing in URI parameter in connector %#v", config)
+		return nil, errors.Errorf("File path is missing in URI parameter in connector: %#v", config)
 	}
 
 	stat, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
-		return nil, errors.Errorf("File passed in URI parameter doesn't exists, connector %#v", config)
+		return nil, errors.Errorf("File passed in URI parameter doesn't exist, connector: %#v", config)
 	}
 	if stat.Mode().IsDir() {
-		return nil, errors.Errorf("URI parameter doesn't point to file, connector %#v", config)
+		return nil, errors.Errorf("URI parameter doesn't point to file, connector: %#v", config)
 	}
 
 	handler := &fileHandler{

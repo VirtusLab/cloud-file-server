@@ -33,18 +33,18 @@ type s3Handler struct {
 // New creates a connector that provides files from AWS s3 bucket
 func New(config config.ConnectorConfig) (http.Handler, error) {
 	if config.URI == "" {
-		return nil, errors.Errorf("URI parameter missing in connector %#v", config)
+		return nil, errors.Errorf("URI parameter missing in connector: %#v", config)
 	}
 	if config.Region == "" {
-		return nil, errors.Errorf("Region parameter missing in connector %#v", config)
+		return nil, errors.Errorf("Region parameter missing in connector: %#v", config)
 	}
 	if !strings.HasPrefix(config.URI, prefixURI) {
-		return nil, errors.Errorf("Invalid URI parameter in connector %#v", config)
+		return nil, errors.Errorf("Invalid URI parameter in connector, expected '%s': %#v", prefixURI, config)
 	}
 
 	uriWithOutS3Prefix := strings.Replace(config.URI, prefixURI, "", 1)
 	if uriWithOutS3Prefix == "" {
-		return nil, errors.Errorf("Bucket name missing in URI parameter in connector %#v", config)
+		return nil, errors.Errorf("Bucket name missing in URI parameter in connector: %#v", config)
 	}
 
 	var bucketName string
@@ -102,12 +102,12 @@ func (h *s3Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			is304 = true
 		// continue so other headers get set appropriately
 		default:
-			log.Printf("Error: %v %v", awsErr.Code(), awsErr.Message())
+			log.Printf("AWS Error: %v %v", awsErr.Code(), awsErr.Message())
 			http.Error(rw, connectors.InternalServerErrorMessage, http.StatusInternalServerError)
 			return
 		}
 	} else if err != nil {
-		log.Printf("not aws error %v %s", err, err)
+		log.Printf("non-AWS error %v %s", err, err)
 		http.Error(rw, connectors.InternalServerErrorMessage, http.StatusInternalServerError)
 		return
 	}

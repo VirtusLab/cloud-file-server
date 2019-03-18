@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/VirtusLab/cloud-file-server/version"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,6 +17,8 @@ import (
 )
 
 func main() {
+	log.Printf("Version: %s-%s", version.VERSION, version.GITCOMMIT)
+
 	configFile := flag.String("config", "", "Configuration file path")
 	flag.Parse()
 
@@ -25,12 +28,12 @@ func main() {
 
 	data, err := ioutil.ReadFile(*configFile)
 	if err != nil {
-		log.Fatalf("Can not read config %s", err.Error())
+		log.Fatalf("Can not read config file: %s", err)
 	}
 
 	var cfg config.Config
 	if err = yaml.UnmarshalStrict(data, &cfg); err != nil {
-		log.Fatalf("Can not parse config %s", err.Error())
+		log.Fatalf("Can not parse config file: %s", err)
 	}
 
 	if cfg.Listen == "" {
