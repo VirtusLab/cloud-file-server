@@ -1,6 +1,8 @@
 # Setup variables for the Makefile
 NAME=cloud-file-server
 PKG=github.com/VirtusLab/cloud-file-server
+REPO=virtuslab/cloud-file-server
+DOCKER_REGISTRY=quay.io
 
 # Set POSIX sh for maximum interoperability
 SHELL := /bin/sh
@@ -22,6 +24,7 @@ BUILDDIR := ${PREFIX}/cross
 # Add to compile time flags
 VERSION := $(shell cat VERSION.txt)
 GITCOMMIT := $(shell git rev-parse --short HEAD)
+GITBRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 GITUNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no)
 GITIGNOREDBUTTRACKEDCHANGES := $(shell git ls-files -i --exclude-standard)
 ifneq ($(GITUNTRACKEDCHANGES),)
@@ -30,6 +33,9 @@ endif
 ifneq ($(GITIGNOREDBUTTRACKEDCHANGES),)
     GITCOMMIT := $(GITCOMMIT)-dirty
 endif
+
+VERSION_TAG := $(VERSION)-$(GITCOMMIT)
+LATEST_TAG := latest
 
 CTIMEVAR=-X $(PKG)/version.GITCOMMIT=$(GITCOMMIT) -X $(PKG)/version.VERSION=$(VERSION)
 GO_LDFLAGS=-ldflags "-w $(CTIMEVAR)"
@@ -45,7 +51,7 @@ ARGS ?= $(EXTRA_ARGS)
 .DEFAULT_GOAL := help
 
 .PHONY: all
-all: clean dep verify ## Ensure deps, test, verify
+all: clean dep verify docker-build ## Ensure deps, test, verify, docker build
 	@echo "+ $@"
 
 .PHONY: init
@@ -171,7 +177,40 @@ clean: ## Cleanup any build binaries or packages
 
 .PHONY: spring-clean
 spring-clean: ## Cleanup git ignored files (interactive)
+	@echo "+ $@"
 	git clean -Xdi
+
+.PHONY: docker-build
+docker-build: ## Build the container
+	@echo "+ $@"
+	docker build -t $(REPO):$(GITCOMMIT) .
+
+.PHONY: docker-login
+docker-login: ## Log in into the repository
+	@echo "+ $@"
+	@docker login -u="${DOCKER_USER}" -p="${DOCKER_PASS}" $(DOCKER_REGISTRY)
+
+.PHONY: docker-images
+docker-images: ## List all local containers
+	@echo "+ $@"
+	@docker images
+
+.PHONY: docker-push
+docker-push: docker-login ## Push the container
+	@echo "+ $@"
+	@docker tag $(REPO):$(GITCOMMIT) $(DOCKER_REGISTRY)/$(REPO):$(VERSION)
+	@docker tag $(REPO):$(GITCOMMIT) $(DOCKER_REGISTRY)/$(REPO):$(VERSION_TAG)
+	@docker tag $(REPO):$(GITCOMMIT) $(DOCKER_REGISTRY)/$(REPO):$(LATEST_TAG)
+	@docker push $(DOCKER_REGISTRY)/$(REPO):$(VERSION)
+	@docker push $(DOCKER_REGISTRY)/$(REPO):$(VERSION_TAG)
+	@docker push $(DOCKER_REGISTRY)/$(REPO):$(LATEST_TAG)
+
+.PHONY: docker-run
+docker-run: docker-build ## Build and run the container
+	@echo "+ $@"
+	@echo See: http://127.0.0.1:8080/host/README.md
+	docker run -i -t -p 8080:8080 -v $(PWD):/host \
+		$(REPO):$(GITCOMMIT) --config /host/simple-config.yaml
 
 .PHONY: bump-version
 BUMP := patch
