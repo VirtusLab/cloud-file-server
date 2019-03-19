@@ -2,7 +2,14 @@ language: go
 sudo: false
 
 services:
-  - docker
+- docker
+
+env:
+  global:
+  # Quay user
+  - secure: NFAMNjQhJNYg0FIGzTP+n7VSmspUFq28AhUrdZdA810BTEkf/ACjXhnx7tuqME2ni/uDKGjSiFeA8td2OddBS3T9S27bSkFSGdE84gxq7dV9VqnONr813fLrpx/a7bbxs/2u4oPJERSYwGR7ZIH4or7bWOmzUHeFPZDfcJLuXgM+jG65WofoPfVM/fyyJDvir8in2IhdLEGnyXfFtSSJklB58HCRV82wYTEiU9ovrl2rM8fRDJ1nbW/kmd7sAmCJn/JVDVODSgig+NG/1RVwFcSrCzTL9DvZf6T1DUPVNuvpSUHNK5elJ0u2qoAC0PbnVDvE+4j+50Ad1Wm56RKiBoOuhWhfb4P4FE+2rRTz3xTJXPnbe6LvtDPLo6/5l0O/fsPVlLK/yUdH+BhNB2v6xjgdFNrKj6WGUGvjCzn0B+ibwmmRIfKblbwr8Hp5iWFjtSPZOm9a0a93bHtdlBwRI9jSXH/IQbThRTDWFaPgvkUsqo0F1SmBAnRkOCH4WLIaMEJl7C2LIVmNjfk1S/pQhN9+J/sJrwWZfWU2M5lTryj2D162MtPPogrPHpHjEgqrYtghZAyRha4zDNwcOcD3pNL6ncQ6VBjX8MuJJEqrvU47Q12XaxVlIeLKp/gMPFoi7U3+w743W8Jq4fPVNAW4O7jgsphNpvFy7Qh/YLQHoMU=
+  # Quay pass
+  - secure: hfYwJMjimDeQJBJUl/6rQ+m/sNx9NVmnb23Jl8wCVyWW5ZjCuL35TPETj23bOju6ckpSWkSvuIIiJdo9RYFyNneBwDZzJlk78ViNxtMO7vP8xcg4w0Qw5tB8oevUyrZui4PQBwWl9/8cEvooQrCP5YAoJJJVD6iHxH8wM0NJdgnbK4QbQIQR65ElbqpGBgOkvqeGivMQMe45ds2IugTN3WgIirq+t2rQAa06Nr1m9Tsq6b3g+Z1o5t67+Lk25GFZ5GjDXXeQBnJh4nq1EGe/iJDur80jPU4hYTMHbemBjxU7WdvixqMX+TCrqJUiVP2w4bzpqKP66QlAOgNIVU6nDfQdxmAell9bs/GQuSpf1hoMtIhz/qQpR8sYhuSFuCu0lF86cgoXh6kKSuuIUdG2kdlMFIEHhZqK9jyfUzWHk9kwFr8K9oODBH1Sabbr1lHLw4AaY0HijqUPNFkzq92eYmaZ4jUy7pSajMizn6aToYFulNq56lKxY4HyFKf+iZXZYLAxmfYoeppR7qBtQ/y+jYqLrtysDp97cSLvhxPQaiPxF5jFcNZnht4PrVsxOR/9fC4NpprFgYqbGAeHzyKC+o3L57ppRleT+L6EFV7ZAL2T/ZWqeNMt3nMO9V0AgsdgkAJsIO7qUnAo/DJYx0r5OKH/WbMqX0nt3RkcbJzNKv4=
 
 go:
 - 1.11.x
@@ -17,14 +24,19 @@ script:
 - make verify
 
 before_deploy:
-- make release
-- echo "Deploying to GitHub releases ..."
+- make -e release docker-build docker-images
 
 deploy:
-  provider: releases
-  api_key:
-    secure: ZtoUiICdperoWcnXLDYdlMP227imit75NAOXnranUernLtPOBaJ4N5OHIXkS7FXGPb4b3drsEuOGZ/jx+cRYBExxftD54teRPJIzsV1S9MmSP1BnLOfXeTV1ls4ckReDZzTCtIYohbno44S95SN2ds0s75P/Vqha/kLstfQJ+nrZCyzsvVTQRTUoN46eI0D3fA3HJXz+eZ4J+sLFd5JFp6ZrEvHomODbbuW47iG7pa2aOPBCjywlT2kDjJLQxg/5PJgIWwVtE90pBeGIgbI++dyNAXMw35+vtutGmIXTIhkTrKhrvYW/9+gvhZNZ8bLwvZ0hIsfrKherTmOWvsGSjkRp1AyORl7H9TEvQxq0nbb+MObpTS26p8j0NOOjsYHIXSIZV+msXtwAH2MYitTbnuAjBpvi0Ihye5ESZexQu8h+YP6HygdhJcSm6GlDYxw8Qv4Ec3gotYG6p55ZYjvIq4W8fR+cZKn1aTODF49XvEJXztjJw3sVXUeLV9QoitHffPAHnGrmwLPWQprioEOHo5gDvncathCa4G55D7r7hZPlB4n5m4wKb+8trM0AUk7Jxianpyo+tBMnF0Pxw3nOEEFrLeCOpdfAacsyhKUOGyBieqVV7dS+1XEghK1MwIjMwcCn3Ydzb5mi5keSh7u1mBCwplsZzjeJn11xaemxbeU=
+- provider: script
+  script:
+  - make -e docker-push
+  on:
+    repo: VirtusLab/cloud-file-server
+    tags: true
+- provider: releases
   skip_cleanup: true
+  api_key:
+    secure: ZY9/g/g1EWJzCxh90Vy1EijhJz+2i+nxw0v7A4Hq00DCcx4SJAOzVQrWwD+pzp8qElzSNdjRj1hLzJutNlHV4B/uRXop0N6gMix9XldglBPWIrDPUxyil2TCNMZ6Ht3j9xO+HQRDRw+Yo2PWpfeuDa7mrnItfOK6gluO8R39FeD+Ye2rHrvWMaOt5VVFBVewT29Suee1LUCadB3m9UoLD1lqsuTYrp5Ceb73yBBrjYl0cpcrnjH6pIIALyVxLnab9pM+nqwyJu9JoWWxb4Rp0cPRdyNF1+fprixka20d59cJUtkJpvIZj971UCBPkgmtSS83oZok2PpKcNUB4xc81klmw7Rd5e4FzO9bw1GwOI3PMhTT21/bOCOORLdIsFLeTviRQBSd3xQxg3mn3DKs/jedfjqnjT8lOg4XDPqri0y1zyL1jnwme865ArdWW8QiFp2pzb9PZsN6E8PRQA9/MAo63nYCxc8PMWoaGpHmdo8Vja/5JmyPi8tcOIzwCzGKXqWehY9eVV4Y5rNby7qjEbCBCTY7lJtjko92wmVkI/h59mHGbYebu7Xw8PMKkHtwG//fGjC7KpAEuN18kq8N79n5KS2usECABhJBUKUUguDkgcrtE46snXFHekr6lSBhXoVcppqn0pOC1Wob9U9yD3VFe2GOB0gyMd/F3g3DZMg=
   on:
     repo: VirtusLab/cloud-file-server
     tags: true
@@ -62,4 +74,4 @@ deploy:
 
 cache:
   directories:
-    - vendor
+  - vendor
