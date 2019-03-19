@@ -24,15 +24,15 @@ script:
 - make verify
 
 before_deploy:
-- make -e release docker-build docker-images
+- make release docker-build docker-images
 
 deploy:
-- provider: script
-  script:
-  - make -e docker-push
-  on:
-    repo: VirtusLab/cloud-file-server
-    tags: true
+#- provider: script
+#  script:
+#  - make -e docker-push
+#  on:
+#    repo: VirtusLab/cloud-file-server
+#    tags: true
 - provider: releases
   skip_cleanup: true
   api_key:
