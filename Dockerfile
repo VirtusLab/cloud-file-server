@@ -1,11 +1,11 @@
-FROM golang:1.9.2-alpine
+FROM golang:1.12-alpine
 
 RUN apk add --no-cache --update alpine-sdk
 
 COPY . /go/src/github.com/VirtusLab/cloud-file-server
 RUN cd /go/src/github.com/VirtusLab/cloud-file-server && go build
 
-FROM alpine:3.6
+FROM alpine:3.9
 
 EXPOSE 8080
 
