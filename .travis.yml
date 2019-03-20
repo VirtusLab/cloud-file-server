@@ -24,7 +24,7 @@ script:
 - make verify
 
 before_deploy:
-- make release docker-build docker-images
+- make release docker-build docker-images docker-login
 
 deploy:
 - provider: script
