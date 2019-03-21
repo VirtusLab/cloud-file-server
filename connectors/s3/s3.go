@@ -100,8 +100,12 @@ func (h *s3Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			return
 		case "NotModified":
 			is304 = true
-		    // continue so other headers get set appropriately
+			// continue so other headers get set appropriately
+		case "NoCredentialProviders":
+			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())
+			http.Error(rw, connectors.UnauthorizedMessage, http.StatusUnauthorized)
 		case "AccessDenied":
+			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())
 			http.Error(rw, connectors.ForbiddenMessage, http.StatusForbidden)
 		default:
 			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())

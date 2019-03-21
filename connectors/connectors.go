@@ -5,6 +5,8 @@ const (
 	InternalServerErrorMessage = "Internal server error"
 	// PageNotFoundMessage message for 404 HTTP responses
 	PageNotFoundMessage = "Page not found"
-	// ForbiddenMessage message for  403 HTTP responses
+	// ForbiddenMessage message for 403 HTTP responses
 	ForbiddenMessage = "Forbidden"
+	// UnauthorizedMessage message for 401 HTTP responses
+	UnauthorizedMessage = "Unauthorized"
 )
