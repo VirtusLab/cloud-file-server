@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/VirtusLab/cloud-file-server/version"
 	"io/ioutil"
 	"log"
@@ -16,8 +17,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	appName = "cloud-file-server"
+
+	defaultListenPort   = 8080
+	defaultReadTimeout  = 5 * time.Second
+	defaultWriteTimeout = 10 * time.Second
+	defaultIdleTimeout  = 65 * time.Second
+)
+
 func main() {
-	log.Printf("Version: %s-%s", version.VERSION, version.GITCOMMIT)
+	log.Printf("Running %s version: %s-%s", appName, version.VERSION, version.GITCOMMIT)
 
 	configFile := flag.String("config", "", "Configuration file path")
 	flag.Parse()
@@ -37,10 +47,11 @@ func main() {
 	}
 
 	if cfg.Listen == "" {
-		cfg.Listen = ":8080"
+		cfg.Listen = fmt.Sprintf(":%d", defaultListenPort)
 	}
 
-	handler := mainhandler.New(cfg)
+	serverName := fmt.Sprintf("%s %s-%s", appName, version.VERSION, version.GITCOMMIT)
+	handler := mainhandler.New(serverName, cfg)
 	if cfg.LogRequests {
 		handler = handlers.CombinedLoggingHandler(os.Stdout, handler)
 	}
@@ -48,8 +59,9 @@ func main() {
 	server := &http.Server{
 		Addr:           cfg.Listen,
 		Handler:        handler,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		ReadTimeout:    defaultReadTimeout,
+		WriteTimeout:   defaultWriteTimeout,
+		IdleTimeout:    defaultIdleTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 	log.Printf("Listening on %s", cfg.Listen)

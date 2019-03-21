@@ -20,10 +20,13 @@ const (
 
 // MainHandler describes main handler configuration
 type MainHandler struct {
+	serverName string
 	connectors map[string]http.Handler
 }
 
 func (h *MainHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Set("Server", h.serverName)
+
 	path := req.URL.Path
 	for pathPrefix, connector := range h.connectors {
 		if strings.HasPrefix(path, pathPrefix) {
@@ -36,7 +39,7 @@ func (h *MainHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 // New creates a main http handler which uses provided connectors
-func New(config config.Config) http.Handler {
+func New(serverName string, config config.Config) http.Handler {
 	if len(config.Connectors) <= 0 {
 		log.Fatal("There are no connectors in config")
 	}
@@ -70,5 +73,7 @@ func New(config config.Config) http.Handler {
 		log.Printf("Created handler %#v", connectorHandler)
 	}
 
-	return &MainHandler{connectors: conns}
+	return &MainHandler{
+		connectors: conns, serverName: serverName,
+	}
 }
