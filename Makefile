@@ -121,7 +121,7 @@ install: ## Installs the executable
 .PHONY: run
 run: ## Run the executable, you can use EXTRA_ARGS
 	@echo "+ $@"
-	@go run -tags "$(BUILDTAGS)" ${GO_LDFLAGS} $(BUILD_PATH)/main.go $(ARGS)
+	@go run -tags "$(BUILDTAGS)" ${GO_LDFLAGS} $(BUILD_PATH)/main.go --config simple-config.yaml $(ARGS)
 
 define buildpretty
 mkdir -p $(BUILDDIR)/$(1)/$(2);
