@@ -31,24 +31,24 @@ type s3Handler struct {
 }
 
 // New creates a connector that provides files from AWS s3 bucket
-func New(config config.ConnectorConfig) (http.Handler, error) {
-	if config.URI == "" {
-		return nil, errors.Errorf("URI parameter missing in connector: %#v", config)
+func New(config config.ConnectorConfig) (handler http.Handler, err error) {
+	if len(config.URI) == 0 {
+		return handler, errors.Errorf("URI parameter missing in connector: %#v", config)
 	}
-	if config.Region == "" {
-		return nil, errors.Errorf("Region parameter missing in connector: %#v", config)
+	if len(config.Region) == 0 {
+		return handler, errors.Errorf("Region parameter missing in connector: %#v", config)
 	}
 	if !strings.HasPrefix(config.URI, prefixURI) {
-		return nil, errors.Errorf("Invalid URI parameter in connector, expected '%s': %#v", prefixURI, config)
+		return handler, errors.Errorf("Invalid URI parameter in connector, expected '%s': %#v", prefixURI, config)
 	}
 
 	uriWithOutS3Prefix := strings.Replace(config.URI, prefixURI, "", 1)
 	if uriWithOutS3Prefix == "" {
-		return nil, errors.Errorf("Bucket name missing in URI parameter in connector: %#v", config)
+		return handler, errors.Errorf("Bucket name missing in URI parameter in connector: %#v", config)
 	}
 
-	var bucketName string
 	bucketFolders := ""
+	var bucketName string
 	if index := strings.Index(uriWithOutS3Prefix, "/"); index == -1 {
 		bucketName = uriWithOutS3Prefix
 	} else {
@@ -56,15 +56,23 @@ func New(config config.ConnectorConfig) (http.Handler, error) {
 		bucketFolders = uriWithOutS3Prefix[index:]
 	}
 
-	newSession, err := session.NewSession()
+	var newSession *session.Session
+	if len(config.Profile) > 0 {
+		newSession, err = session.NewSessionWithOptions(session.Options{
+			Profile: config.Profile,
+		})
+	} else {
+		newSession, err = session.NewSession()
+	}
 	if err != nil {
 		return nil, err
 	}
+
 	service := s3.New(newSession, &aws.Config{
 		Region: &config.Region,
 	})
 
-	handler := &s3Handler{
+	handler = &s3Handler{
 		pathPrefix:    config.PathPrefix,
 		bucketName:    bucketName,
 		bucketFolders: bucketFolders,
@@ -104,9 +112,11 @@ func (h *s3Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		case "NoCredentialProviders":
 			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())
 			http.Error(rw, connectors.UnauthorizedMessage, http.StatusUnauthorized)
+			return
 		case "AccessDenied":
 			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())
 			http.Error(rw, connectors.ForbiddenMessage, http.StatusForbidden)
+			return
 		default:
 			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())
 			http.Error(rw, connectors.InternalServerErrorMessage, http.StatusInternalServerError)

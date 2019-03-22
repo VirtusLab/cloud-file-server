@@ -12,5 +12,6 @@ type ConnectorConfig struct {
 	Type       string
 	URI        string
 	Region     string
+	Profile    string
 	PathPrefix string `yaml:"pathPrefix"`
 }
