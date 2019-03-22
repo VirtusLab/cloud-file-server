@@ -56,21 +56,21 @@ func New(config config.ConnectorConfig) (handler http.Handler, err error) {
 		bucketFolders = uriWithOutS3Prefix[index:]
 	}
 
-	var newSession *session.Session
-	if len(config.Profile) > 0 {
-		newSession, err = session.NewSessionWithOptions(session.Options{
+	awsConfig := aws.NewConfig().
+		WithRegion(config.Region).
+		WithCredentialsChainVerboseErrors(true)
+
+	awsOptions := session.Options{
+			Config: *awsConfig,
 			Profile: config.Profile,
-		})
-	} else {
-		newSession, err = session.NewSession()
 	}
+
+	awsSession, err := session.NewSessionWithOptions(awsOptions)
 	if err != nil {
 		return nil, err
 	}
 
-	service := s3.New(newSession, &aws.Config{
-		Region: &config.Region,
-	})
+	service := s3.New(awsSession)
 
 	handler = &s3Handler{
 		pathPrefix:    config.PathPrefix,
