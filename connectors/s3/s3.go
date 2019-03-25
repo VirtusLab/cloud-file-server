@@ -61,8 +61,8 @@ func New(config config.ConnectorConfig) (handler http.Handler, err error) {
 		WithCredentialsChainVerboseErrors(true)
 
 	awsOptions := session.Options{
-			Config: *awsConfig,
-			Profile: config.Profile,
+		Config:  *awsConfig,
+		Profile: config.Profile,
 	}
 
 	awsSession, err := session.NewSessionWithOptions(awsOptions)
@@ -103,12 +103,18 @@ func (h *s3Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	resp, err := h.service.GetObject(input)
 	if awsErr, ok := err.(awserr.Error); ok {
 		switch awsErr.Code() {
-		case s3.ErrCodeNoSuchKey:
-			http.Error(rw, connectors.PageNotFoundMessage, http.StatusNotFound)
-			return
 		case "NotModified":
+			log.Printf("AWS Status: %v: %v", awsErr.Code(), awsErr.Message())
 			is304 = true
 			// continue so other headers get set appropriately
+		case s3.ErrCodeNoSuchKey:
+			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())
+			http.Error(rw, connectors.PageNotFoundMessage, http.StatusNotFound)
+			return
+		case s3.ErrCodeNoSuchBucket:
+			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())
+			http.Error(rw, connectors.PageNotFoundMessage, http.StatusNotFound)
+			return
 		case "NoCredentialProviders":
 			log.Printf("AWS Error: %v: %v", awsErr.Code(), awsErr.Message())
 			http.Error(rw, connectors.UnauthorizedMessage, http.StatusUnauthorized)
@@ -128,17 +134,16 @@ func (h *s3Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var contentType string
-	ext := path.Ext(req.URL.Path)
-	contentType = mime.TypeByExtension(ext)
+	if resp == nil {
+		log.Printf("AWS response is nil")
+		http.Error(rw, connectors.InternalServerErrorMessage, http.StatusInternalServerError)
+		return
+	}
 
-	if contentType == "" {
-		if resp.ContentType != nil {
-			contentType = *resp.ContentType
-		} else {
-			log.Printf("Could not set conentType for %q", key)
-			http.Error(rw, connectors.InternalServerErrorMessage, http.StatusInternalServerError)
-		}
+	ext := path.Ext(req.URL.Path)
+	var contentType = mime.TypeByExtension(ext)
+	if resp.ContentType != nil {
+		contentType = *resp.ContentType
 	}
 
 	if resp.ETag != nil && *resp.ETag != "" {
@@ -153,6 +158,7 @@ func (h *s3Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	if is304 {
+		log.Printf("Propagating 304")
 		rw.WriteHeader(304)
 	} else {
 		_, err := io.Copy(rw, resp.Body)
