@@ -21,10 +21,11 @@ before_install:
 - make init dep
 
 script:
-- make verify
+- make status verify
 
 before_deploy:
-- make release docker-build docker-images
+- make status release docker-build docker-images
+- echo "Deploying to GitHub and Quay ..."
 
 deploy:
 - provider: script
@@ -75,4 +76,4 @@ deploy:
 
 cache:
   directories:
-  - vendor
+    - vendor

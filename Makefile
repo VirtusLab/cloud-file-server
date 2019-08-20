@@ -1,8 +1,8 @@
 # Setup variables for the Makefile
-NAME=cloud-file-server
-PKG=github.com/VirtusLab/cloud-file-server
-REPO=virtuslab/cloud-file-server
-DOCKER_REGISTRY=quay.io
+NAME := cloud-file-server
+PKG := github.com/VirtusLab/$(NAME)
+REPO := virtuslab/$(NAME)
+DOCKER_REGISTRY := quay.io
 
 # Set POSIX sh for maximum interoperability
 SHELL := /bin/sh
@@ -51,7 +51,7 @@ ARGS ?= $(EXTRA_ARGS)
 .DEFAULT_GOAL := help
 
 .PHONY: all
-all: clean dep verify docker-build ## Ensure deps, test, verify, docker build
+all: clean dep verify build docker-build ## Ensure deps, test, verify, docker build
 	@echo "+ $@"
 
 .PHONY: init
@@ -62,6 +62,7 @@ init: ## Initializes this Makefile dependencies: dep, golint, staticcheck, check
 	go get -u honnef.co/go/tools/cmd/staticcheck
 	go get -u golang.org/x/tools/cmd/goimports
 	go get -u github.com/mrtazz/checkmake
+	go get -u github.com/jessfraz/junk/sembump
 
 .PHONY: dep
 dep: ## Populates the vendor directory with dependencies
@@ -91,7 +92,7 @@ fmt: ## Verifies all files have been `gofmt`ed
 .PHONY: lint
 lint: ## Verifies `golint` passes
 	@echo "+ $@"
-	@golint $(PACKAGES)
+	@golint -set_exit_status $(PACKAGES)
 
 .PHONY: goimports
 goimports: ## Verifies `goimports` passes
@@ -113,30 +114,29 @@ staticcheck: ## Verifies `staticcheck` passes
 	@echo "+ $@"
 	@staticcheck $(PACKAGES)
 
+.PHONY: verify
+verify: fmt lint vet staticcheck goimports test ## Runs a fmt, lint, vet, staticcheck, goimports and test
+
+.PHONY: cover
+cover: ## Runs go test with coverage
+	@echo "" > coverage.txt
+	@for d in $(PACKAGES); do \
+		RUNNING_TESTS=1 go test -race -coverprofile=profile.out -covermode=atomic "$$d"; \
+		if [ -f profile.out ]; then \
+			cat profile.out >> coverage.txt; \
+			rm profile.out; \
+		fi; \
+	done;
+
 .PHONY: install
 install: ## Installs the executable
 	@echo "+ $@"
-	@go install -tags "$(BUILDTAGS)" ${GO_LDFLAGS} $(BUILD_PATH)
+	go install -tags "$(BUILDTAGS)" ${GO_LDFLAGS} $(BUILD_PATH)
 
 .PHONY: run
 run: ## Run the executable, you can use EXTRA_ARGS
 	@echo "+ $@"
-	@go run -tags "$(BUILDTAGS)" ${GO_LDFLAGS} $(BUILD_PATH)/main.go --config simple-config.yaml $(ARGS)
-
-define buildpretty
-mkdir -p $(BUILDDIR)/$(1)/$(2);
-GOOS=$(1) GOARCH=$(2) CGO_ENABLED=0 go build \
-		-o $(BUILDDIR)/$(1)/$(2)/$(NAME) \
-		-a -tags "$(BUILDTAGS) static_build netgo" \
-		-installsuffix netgo ${GO_LDFLAGS_STATIC} $(BUILD_PATH);
-md5sum $(BUILDDIR)/$(1)/$(2)/$(NAME) > $(BUILDDIR)/$(1)/$(2)/$(NAME).md5;
-sha256sum $(BUILDDIR)/$(1)/$(2)/$(NAME) > $(BUILDDIR)/$(1)/$(2)/$(NAME).sha256;
-endef
-
-.PHONY: cross
-cross: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-compiled binaries, creating a clean directory structure (eg. GOOS/GOARCH/binary)
-	@echo "+ $@"
-	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildpretty,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
+	go run -tags "$(BUILDTAGS)" ${GO_LDFLAGS} $(BUILD_PATH)/main.go --config simple-config.yaml $(ARGS)
 
 define buildrelease
 GOOS=$(1) GOARCH=$(2) CGO_ENABLED=0 go build \
@@ -151,20 +151,6 @@ endef
 release: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-compiled binaries, naming them in such a way for release (eg. binary-GOOS-GOARCH)
 	@echo "+ $@"
 	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
-
-.PHONY: verify
-verify: fmt lint vet staticcheck goimports test ## Runs a fmt, lint, vet, staticcheck, goimports and test
-
-.PHONY: cover
-cover: ## Runs go test with coverage
-	@echo "" > coverage.txt
-	@for d in $(PACKAGES); do \
-		RUNNING_TESTS=1 go test -race -coverprofile=profile.out -covermode=atomic "$$d"; \
-		if [ -f profile.out ]; then \
-			cat profile.out >> coverage.txt; \
-			rm profile.out; \
-		fi; \
-	done;
 
 .PHONY: clean
 clean: ## Cleanup any build binaries or packages
@@ -216,10 +202,9 @@ docker-run: docker-build ## Build and run the container
 BUMP := patch
 bump-version: ## Bump the version in the version file. Set BUMP to [ patch | major | minor ]
 	@echo "+ $@"
-	go get -u github.com/jessfraz/junk/sembump # update sembump tool
 	$(eval NEW_VERSION=$(shell sembump --kind $(BUMP) $(VERSION)))
 	@echo "Bumping VERSION.txt from $(VERSION) to $(NEW_VERSION)"
-	echo $(NEW_VERSION) > VERSION.txt
+	@echo $(NEW_VERSION) > VERSION.txt
 	@echo "Updating version from $(VERSION) to $(NEW_VERSION) in README.md"
 	sed -i s/$(VERSION)/$(NEW_VERSION)/g README.md
 	git add VERSION.txt README.md
@@ -231,15 +216,6 @@ tag: ## Create a new git tag to prepare to build a release
 	@echo "+ $@"
 	git tag -a $(VERSION) -m "$(VERSION)"
 	git push origin $(VERSION)
-
-.PHONY: help
-help:
-	@grep -Eh '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
-
-.PHONY: checkmake
-checkmake: ## Check this Makefile
-	@echo "+ $@"
-	@checkmake Makefile
 
 .PHONY: status
 status: ## Shows git and dep status
@@ -259,3 +235,12 @@ endif
 	@echo "Dependencies:"
 	@dep status
 	@echo
+
+.PHONY: checkmake
+checkmake: ## Check this Makefile
+	@echo "+ $@"
+	@checkmake Makefile
+
+.PHONY: help
+help:
+	@grep -Eh '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
