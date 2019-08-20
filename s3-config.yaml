@@ -1,0 +1,8 @@
+listen: :8080
+logRequests: true
+connectors:
+- type: s3
+  uri: s3://example/
+  region: eu-west-2
+  profile: default
+  pathPrefix: /
