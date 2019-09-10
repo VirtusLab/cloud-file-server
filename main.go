@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/VirtusLab/cloud-file-server/version"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/VirtusLab/cloud-file-server/config"
 	mainhandler "github.com/VirtusLab/cloud-file-server/handlers"
+	"github.com/VirtusLab/cloud-file-server/version"
 
 	"github.com/gorilla/handlers"
 	"gopkg.in/yaml.v2"
