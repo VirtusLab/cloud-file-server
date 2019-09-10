@@ -10,7 +10,7 @@
   version = "v0.0.10"
 
 [[projects]]
-  digest = "1:a697c50c05d102ba1cc7c468e224a45265cf02e51a40616364041ebe459b5031"
+  digest = "1:3b037e5e14b77258878f05904573aeb0d4a1839c6815580ad6b91cb42333f735"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -34,12 +34,14 @@
     "internal/ini",
     "internal/s3err",
     "internal/sdkio",
+    "internal/sdkmath",
     "internal/sdkrand",
     "internal/sdkuri",
     "internal/shareddefaults",
     "private/protocol",
     "private/protocol/eventstream",
     "private/protocol/eventstream/eventstreamapi",
+    "private/protocol/json/jsonutil",
     "private/protocol/query",
     "private/protocol/query/queryutil",
     "private/protocol/rest",
@@ -47,10 +49,11 @@
     "private/protocol/xml/xmlutil",
     "service/s3",
     "service/sts",
+    "service/sts/stsiface",
   ]
   pruneopts = ""
-  revision = "2410a5b1bbbb4e64c57dd1030f204c8fbfb1c58a"
-  version = "v1.18.3"
+  revision = "db133b72163d045aea9419c8e95b3d312d590135"
+  version = "v1.23.18"
 
 [[projects]]
   digest = "1:d0cb0492556fe1914b07b5fbcad0b96260353148984432fab9408de707b53be2"
