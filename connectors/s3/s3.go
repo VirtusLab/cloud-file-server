@@ -14,7 +14,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/bugsnag/bugsnag-go/errors"
 )
@@ -56,21 +55,12 @@ func New(config config.ConnectorConfig) (handler http.Handler, err error) {
 		bucketFolders = uriWithOutS3Prefix[index:]
 	}
 
-	awsConfig := aws.NewConfig().
-		WithRegion(config.Region).
-		WithCredentialsChainVerboseErrors(true)
-
-	awsOptions := session.Options{
-		Config:  *awsConfig,
-		Profile: config.Profile,
-	}
-
-	awsSession, err := session.NewSessionWithOptions(awsOptions)
+	awsSession, awsConfig, err := SessionConfig(config.Region, config.Profile)
 	if err != nil {
 		return nil, err
 	}
 
-	service := s3.New(awsSession)
+	service := s3.New(awsSession, awsConfig)
 
 	handler = &s3Handler{
 		pathPrefix:    config.PathPrefix,
