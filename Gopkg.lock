@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:976c7bdcb990cfdbea99b246ff135cb5e1832d4b69644beb1b28dc2641b01b90"
+  name = "github.com/VirtusLab/go-extended"
+  packages = ["pkg/errors"]
+  pruneopts = ""
+  revision = "d5d831218cea6a5ea0104127e990f0142517f712"
+  version = "v0.0.10"
+
+[[projects]]
   digest = "1:a697c50c05d102ba1cc7c468e224a45265cf02e51a40616364041ebe459b5031"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -79,6 +87,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/VirtusLab/go-extended/pkg/errors",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/aws/aws-sdk-go/aws/session",
