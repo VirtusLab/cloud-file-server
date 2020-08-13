@@ -2,7 +2,7 @@
 
 `cloud-file-server` is an application that serves files over HTTP using configured connectors (i.e. S3, file, dir)
 
-[![Version](https://img.shields.io/badge/version-v0.0.9-brightgreen.svg)](https://github.com/VirtusLab/cloud-file-server/releases/tag/v0.0.9)
+[![Version](https://img.shields.io/badge/version-v0.0.10-brightgreen.svg)](https://github.com/VirtusLab/cloud-file-server/releases/tag/v0.0.10)
 [![Build Status](https://travis-ci.org/VirtusLab/cloud-file-server.svg?branch=master)](https://travis-ci.org/VirtusLab/cloud-file-server)
 [![Docker Repository on Quay](https://quay.io/repository/VirtusLab/cloud-file-server/status "Docker Repository on Quay")](https://quay.io/repository/VirtusLab/cloud-file-server)
 [![Go Report Card](https://goreportcard.com/badge/github.com/VirtusLab/cloud-file-server)](https://goreportcard.com/report/github.com/VirtusLab/cloud-file-server)
