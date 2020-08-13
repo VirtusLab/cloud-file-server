@@ -38,36 +38,36 @@ VERSION_TAG := $(VERSION)-$(GITCOMMIT)
 LATEST_TAG := latest
 
 CTIMEVAR=-X $(PKG)/version.GITCOMMIT=$(GITCOMMIT) -X $(PKG)/version.VERSION=$(VERSION)
-GO_LDFLAGS=-ldflags "-w $(CTIMEVAR)"
-GO_LDFLAGS_STATIC=-ldflags "-w $(CTIMEVAR) -extldflags -static"
+GO_FLAGS=-ldflags "-w $(CTIMEVAR)"
+GO_FLAGS_STATIC=-ldflags "-w $(CTIMEVAR) -extldflags -static"
 
 # List the GOOS and GOARCH to build
 GOOSARCHES = darwin/amd64 darwin/386 freebsd/amd64 freebsd/386 linux/arm linux/arm64 linux/amd64 linux/386 windows/amd64 windows/386
 
-PACKAGES = $(shell go list -f '{{.ImportPath}}/' ./... | grep -v vendor)
+PACKAGES = $(shell go list -f '{{.ImportPath}}/' ./...)
 
 ARGS ?= $(EXTRA_ARGS)
 
 .DEFAULT_GOAL := help
 
 .PHONY: all
-all: clean dep verify build docker-build ## Ensure deps, test, verify, docker build
+all: clean mod verify build docker-build ## Ensure deps, test, verify, docker build
 	@echo "+ $@"
 
 .PHONY: init
-init: ## Initializes this Makefile dependencies: dep, golint, staticcheck, checkmake
+init: ## Initializes this Makefile dependencies
 	@echo "+ $@"
-	go get -u github.com/golang/dep/cmd/dep
-	go get -u golang.org/x/lint/golint
-	go get -u honnef.co/go/tools/cmd/staticcheck
-	go get -u golang.org/x/tools/cmd/goimports
-	go get -u github.com/mrtazz/checkmake
-	go get -u github.com/jessfraz/junk/sembump
+	@# https://github.com/golang/go/issues/32502
+	GO111MODULE=off go get -u golang.org/x/lint/golint
+	GO111MODULE=off go get -u honnef.co/go/tools/cmd/staticcheck
+	GO111MODULE=off go get -u golang.org/x/tools/cmd/goimports
+	GO111MODULE=off go get -u github.com/mrtazz/checkmake
+	GO111MODULE=off go get -u github.com/jessfraz/junk/sembump
 
-.PHONY: dep
-dep: ## Populates the vendor directory with dependencies
+.PHONY: mod
+mod: ## Downloads dependencies and updates go.mod and go.sum
 	@echo "+ $@"
-	@dep ensure -v
+	go mod tidy
 
 .PHONY: build
 build: $(NAME) ## Builds a dynamic executable or package
@@ -75,14 +75,14 @@ build: $(NAME) ## Builds a dynamic executable or package
 
 $(NAME): $(wildcard *.go) $(wildcard */*.go) VERSION.txt
 	@echo "+ $@"
-	go build -tags "$(BUILDTAGS)" ${GO_LDFLAGS} -o $(NAME) $(BUILD_PATH)
+	go build -tags "$(BUILDTAGS)" ${GO_FLAGS} -o $(NAME) $(BUILD_PATH)
 
 .PHONY: static
 static: ## Builds a static executable
 	@echo "+ $@"
 	CGO_ENABLED=0 go build \
 				-tags "$(BUILDTAGS) static_build" \
-				${GO_LDFLAGS_STATIC} -o $(NAME) $(BUILD_PATH)
+				${GO_FLAGS_STATIC} -o $(NAME) $(BUILD_PATH)
 
 .PHONY: fmt
 fmt: ## Verifies all files have been `gofmt`ed
@@ -97,7 +97,7 @@ lint: ## Verifies `golint` passes
 .PHONY: goimports
 goimports: ## Verifies `goimports` passes
 	@echo "+ $@"
-	@goimports -l -e $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+	@goimports -l -e $(shell find . -type f -name '*.go')
 
 .PHONY: test
 test: ## Runs the go tests
@@ -114,6 +114,30 @@ staticcheck: ## Verifies `staticcheck` passes
 	@echo "+ $@"
 	@staticcheck $(PACKAGES)
 
+.PHONY: install
+install: ## Installs the executable
+	@echo "+ $@"
+	@go install -tags "$(BUILDTAGS)" ${GO_FLAGS} $(BUILD_PATH)
+
+.PHONY: run
+run: ## Run the executable, you can use EXTRA_ARGS
+	@echo "+ $@"
+	@go run -tags "$(BUILDTAGS)" ${GO_FLAGS} $(BUILD_PATH)/main.go --config simple-config.yaml $(ARGS)
+
+define buildrelease
+GOOS=$(1) GOARCH=$(2) CGO_ENABLED=0 go build \
+	 -o $(BUILDDIR)/$(NAME)-$(1)-$(2) \
+	 -a -tags "$(BUILDTAGS) static_build netgo" \
+	 -installsuffix netgo ${GO_FLAGS_STATIC} $(BUILD_PATH);
+md5sum $(BUILDDIR)/$(NAME)-$(1)-$(2) > $(BUILDDIR)/$(NAME)-$(1)-$(2).md5;
+sha256sum $(BUILDDIR)/$(NAME)-$(1)-$(2) > $(BUILDDIR)/$(NAME)-$(1)-$(2).sha256;
+endef
+
+.PHONY: release
+release: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-compiled binaries, naming them in such a way for release (eg. binary-GOOS-GOARCH)
+	@echo "+ $@"
+	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
+
 .PHONY: verify
 verify: fmt lint vet staticcheck goimports test ## Runs a fmt, lint, vet, staticcheck, goimports and test
 
@@ -127,30 +151,6 @@ cover: ## Runs go test with coverage
 			rm profile.out; \
 		fi; \
 	done;
-
-.PHONY: install
-install: ## Installs the executable
-	@echo "+ $@"
-	go install -tags "$(BUILDTAGS)" ${GO_LDFLAGS} $(BUILD_PATH)
-
-.PHONY: run
-run: ## Run the executable, you can use EXTRA_ARGS
-	@echo "+ $@"
-	go run -tags "$(BUILDTAGS)" ${GO_LDFLAGS} $(BUILD_PATH)/main.go --config simple-config.yaml $(ARGS)
-
-define buildrelease
-GOOS=$(1) GOARCH=$(2) CGO_ENABLED=0 go build \
-	 -o $(BUILDDIR)/$(NAME)-$(1)-$(2) \
-	 -a -tags "$(BUILDTAGS) static_build netgo" \
-	 -installsuffix netgo ${GO_LDFLAGS_STATIC} $(BUILD_PATH);
-md5sum $(BUILDDIR)/$(NAME)-$(1)-$(2) > $(BUILDDIR)/$(NAME)-$(1)-$(2).md5;
-sha256sum $(BUILDDIR)/$(NAME)-$(1)-$(2) > $(BUILDDIR)/$(NAME)-$(1)-$(2).sha256;
-endef
-
-.PHONY: release
-release: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-compiled binaries, naming them in such a way for release (eg. binary-GOOS-GOARCH)
-	@echo "+ $@"
-	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
 
 .PHONY: clean
 clean: ## Cleanup any build binaries or packages
@@ -182,7 +182,7 @@ docker-images: ## List all local containers
 	@docker images
 
 .PHONY: docker-push
-docker-push: docker-login ## Push the container
+docker-push: ## Push the container
 	@echo "+ $@"
 	@docker tag $(REPO):$(GITCOMMIT) $(DOCKER_REGISTRY)/$(REPO):$(VERSION)
 	@docker tag $(REPO):$(GITCOMMIT) $(DOCKER_REGISTRY)/$(REPO):$(VERSION_TAG)
@@ -191,12 +191,20 @@ docker-push: docker-login ## Push the container
 	@docker push $(DOCKER_REGISTRY)/$(REPO):$(VERSION_TAG)
 	@docker push $(DOCKER_REGISTRY)/$(REPO):$(LATEST_TAG)
 
+# if this session isn't interactive, then we don't want to allocate a
+# TTY, which would fail, but if it is interactive, we do want to attach
+# so that the user can send e.g. ^C through.
+INTERACTIVE := $(shell [ -t 0 ] && echo 1 || echo 0)
+ifeq ($(INTERACTIVE), 1)
+    DOCKER_FLAGS += -t
+endif
+
 .PHONY: docker-run
-docker-run: docker-build ## Build and run the container
+docker-run: docker-build ## Build and run the container, you can use EXTRA_ARGS
 	@echo "+ $@"
 	@echo See: http://127.0.0.1:8080/host/README.md
 	docker run -i -t -p 8080:8080 -v $(PWD):/host \
-		$(REPO):$(GITCOMMIT) --config /host/simple-config.yaml
+		$(REPO):$(GITCOMMIT) --config /host/simple-config.yaml $(ARGS)
 
 .PHONY: bump-version
 BUMP := patch
@@ -218,7 +226,7 @@ tag: ## Create a new git tag to prepare to build a release
 	git push origin $(VERSION)
 
 .PHONY: status
-status: ## Shows git and dep status
+status: ## Shows general status
 	@echo "+ $@"
 	@echo "Commit: $(GITCOMMIT), VERSION: $(VERSION)"
 	@echo
@@ -233,7 +241,7 @@ ifneq ($(GITIGNOREDBUTTRACKEDCHANGES),)
 	@echo
 endif
 	@echo "Dependencies:"
-	@dep status
+	@go list -m all
 	@echo
 
 .PHONY: checkmake

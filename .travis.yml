@@ -2,78 +2,81 @@ language: go
 sudo: false
 
 services:
-- docker
+  - docker
 
 env:
   global:
-  # DOCKER_USER
-  - secure: XZa68JmwR5rfWCL0ruGqqt3zExea+K65Sh5NSjqifAkIBilSr65dVQP98wLZ6seGBqkjnf+3mV4a/WQvbYWKk7YY+advKDP4mqwHxZkbTjQaOMuBtUKUP1EoZiwee2N1UfVqtBg41B9+MQInTbkIW1AEZGZI7LY6Q/m8VsEN83Uw46jUDnB61Pzoh2SVFixlEqJb6s/UyoXZaHo1Oxqjwue7hKpAEX36WZcWNaFnACFaKNqPuV7/FlOyyZmQ6x8b+5qe6WNXp/uP0qiEGouQ5V0UHdKNMqMochj/MdlH5X1dGopAtXX2knDta7dz9RSo/+/VQrSkFIqApQOQSVh8OhtK+cxn9EOKWo2DpISgvV977NR1vMrPd7RxrMpQyAISMmR4rn5pEDQDIR4VcNGENEF2UmMH10oT5NbJwJT1EKJQY9KnuqvKD8LkjLSzgRdEsczQpCsJht7YIsJ5Cw+sCBAkui3I+Togi2z8akiKcNetkVPLX8BGCK/pLlK/RlYzeym9cDSwz4gqlWtx8YdlUvUa1MlB22x2lqjPUgakCmm4hyuztPQgEMJXvymywWRsXc+pXrRitoAa/jY8dLFOrw0hsm2FiLXeTBbr1aon0wrDXtgqTlUVe09zTRS6eut9/5rhl4L3DdZFf66Sudbhw3bjU43+4emIt0Ni4u5lI/E=
-  # DOCKER_PASS
-  - secure: SHvPJR4mTb11vE7j1a/pq5B/FsvusuyZQUTRp33n/YVPZpvzEihsWhF1CEqYTl2ozoPvfcHLSDTJisNSzJ6vZliuHPb+0hhr9mXseE8bGHFljU8isASovTa3gVHDle0J0UyRehhldqtpsJ46GViFeW1E3lGISZ8uDE4U4wyMUnPyWfNUQLKePW1NjgrMb1limSxQTkCg8iZCxA0goApm3iNkaVk+zbl6mo8eHSoPS74S6h8pIn0IGKs5zPO4ZImR+UfCMU1m2kII9+KlvyQ/o7/X5OgzTtoeLCD84WG9oKcHlfWL8zzAeZu2pu0WVTqf1fDD1SE3Tcloyfc6YQxNmmPTG6IZw6NHTkhiSj1DS1DWtl7ToGgqBXGWmRGMeDW5DeafUfnO6GTrA/7P6JD3vjrpvmEt5FOHIiNUNoe2LnDajgnJAUsyt/waxfk0NJaQpUCt7YGygI563ODDdaWLxrzmNDKbGL4OoshhCUr5QyB1p8owvoj0I9pwTTt2UOyy8A4jLh/KG1RsYqW9pvihTFRKQQBjTm5UBREphjCumq8kD3ntTldl5tx8NOccUthtJol06lyD2PcFXXUT8cVsxkpjZGG2T26ioP6L9/roxVX+wVckoU6O+/M5X8nqUBWUJl6CVzLqcmdhl81y6Nk/jJaxlMZ+TJTkybkeLMAq2B8=
+    # DOCKER_USER
+    - secure: XZa68JmwR5rfWCL0ruGqqt3zExea+K65Sh5NSjqifAkIBilSr65dVQP98wLZ6seGBqkjnf+3mV4a/WQvbYWKk7YY+advKDP4mqwHxZkbTjQaOMuBtUKUP1EoZiwee2N1UfVqtBg41B9+MQInTbkIW1AEZGZI7LY6Q/m8VsEN83Uw46jUDnB61Pzoh2SVFixlEqJb6s/UyoXZaHo1Oxqjwue7hKpAEX36WZcWNaFnACFaKNqPuV7/FlOyyZmQ6x8b+5qe6WNXp/uP0qiEGouQ5V0UHdKNMqMochj/MdlH5X1dGopAtXX2knDta7dz9RSo/+/VQrSkFIqApQOQSVh8OhtK+cxn9EOKWo2DpISgvV977NR1vMrPd7RxrMpQyAISMmR4rn5pEDQDIR4VcNGENEF2UmMH10oT5NbJwJT1EKJQY9KnuqvKD8LkjLSzgRdEsczQpCsJht7YIsJ5Cw+sCBAkui3I+Togi2z8akiKcNetkVPLX8BGCK/pLlK/RlYzeym9cDSwz4gqlWtx8YdlUvUa1MlB22x2lqjPUgakCmm4hyuztPQgEMJXvymywWRsXc+pXrRitoAa/jY8dLFOrw0hsm2FiLXeTBbr1aon0wrDXtgqTlUVe09zTRS6eut9/5rhl4L3DdZFf66Sudbhw3bjU43+4emIt0Ni4u5lI/E=
+    # DOCKER_PASS
+    - secure: SHvPJR4mTb11vE7j1a/pq5B/FsvusuyZQUTRp33n/YVPZpvzEihsWhF1CEqYTl2ozoPvfcHLSDTJisNSzJ6vZliuHPb+0hhr9mXseE8bGHFljU8isASovTa3gVHDle0J0UyRehhldqtpsJ46GViFeW1E3lGISZ8uDE4U4wyMUnPyWfNUQLKePW1NjgrMb1limSxQTkCg8iZCxA0goApm3iNkaVk+zbl6mo8eHSoPS74S6h8pIn0IGKs5zPO4ZImR+UfCMU1m2kII9+KlvyQ/o7/X5OgzTtoeLCD84WG9oKcHlfWL8zzAeZu2pu0WVTqf1fDD1SE3Tcloyfc6YQxNmmPTG6IZw6NHTkhiSj1DS1DWtl7ToGgqBXGWmRGMeDW5DeafUfnO6GTrA/7P6JD3vjrpvmEt5FOHIiNUNoe2LnDajgnJAUsyt/waxfk0NJaQpUCt7YGygI563ODDdaWLxrzmNDKbGL4OoshhCUr5QyB1p8owvoj0I9pwTTt2UOyy8A4jLh/KG1RsYqW9pvihTFRKQQBjTm5UBREphjCumq8kD3ntTldl5tx8NOccUthtJol06lyD2PcFXXUT8cVsxkpjZGG2T26ioP6L9/roxVX+wVckoU6O+/M5X8nqUBWUJl6CVzLqcmdhl81y6Nk/jJaxlMZ+TJTkybkeLMAq2B8=
+    - GO111MODULE=on
 
 go:
-- 1.12.x
+  - 1.14.x
 
 matrix:
   fast_finish: true
 
 before_install:
-- make init dep
+  - make init
 
 script:
-- make status verify
+  - make status verify
 
 before_deploy:
-- make status release docker-build docker-images
-- echo "Deploying to GitHub and Quay ..."
+  - go mod vendor
+  - make status release docker-build docker-images
+  - echo "Deploying to GitHub and Quay ..."
 
 deploy:
-- provider: script
-  skip_cleanup: true
-  script:
-  - make -e docker-login docker-push
-  on:
-    repo: VirtusLab/cloud-file-server
-    tags: true
-- provider: releases
-  skip_cleanup: true
-  api_key:
-    secure: ZY9/g/g1EWJzCxh90Vy1EijhJz+2i+nxw0v7A4Hq00DCcx4SJAOzVQrWwD+pzp8qElzSNdjRj1hLzJutNlHV4B/uRXop0N6gMix9XldglBPWIrDPUxyil2TCNMZ6Ht3j9xO+HQRDRw+Yo2PWpfeuDa7mrnItfOK6gluO8R39FeD+Ye2rHrvWMaOt5VVFBVewT29Suee1LUCadB3m9UoLD1lqsuTYrp5Ceb73yBBrjYl0cpcrnjH6pIIALyVxLnab9pM+nqwyJu9JoWWxb4Rp0cPRdyNF1+fprixka20d59cJUtkJpvIZj971UCBPkgmtSS83oZok2PpKcNUB4xc81klmw7Rd5e4FzO9bw1GwOI3PMhTT21/bOCOORLdIsFLeTviRQBSd3xQxg3mn3DKs/jedfjqnjT8lOg4XDPqri0y1zyL1jnwme865ArdWW8QiFp2pzb9PZsN6E8PRQA9/MAo63nYCxc8PMWoaGpHmdo8Vja/5JmyPi8tcOIzwCzGKXqWehY9eVV4Y5rNby7qjEbCBCTY7lJtjko92wmVkI/h59mHGbYebu7Xw8PMKkHtwG//fGjC7KpAEuN18kq8N79n5KS2usECABhJBUKUUguDkgcrtE46snXFHekr6lSBhXoVcppqn0pOC1Wob9U9yD3VFe2GOB0gyMd/F3g3DZMg=
-  on:
-    repo: VirtusLab/cloud-file-server
-    tags: true
-  file:
-  - cross/render-darwin-amd64
-  - cross/render-darwin-amd64.md5
-  - cross/render-darwin-amd64.sha256
-  - cross/render-darwin-386
-  - cross/render-darwin-386.md5
-  - cross/render-darwin-386.sha256
-  - cross/render-freebsd-amd64
-  - cross/render-freebsd-amd64.md5
-  - cross/render-freebsd-amd64.sha256
-  - cross/render-freebsd-386
-  - cross/render-freebsd-386.md5
-  - cross/render-freebsd-386.sha256
-  - cross/render-linux-arm
-  - cross/render-linux-arm.md5
-  - cross/render-linux-arm.sha256
-  - cross/render-linux-arm64
-  - cross/render-linux-arm64.md5
-  - cross/render-linux-arm64.sha256
-  - cross/render-linux-amd64
-  - cross/render-linux-amd64.md5
-  - cross/render-linux-amd64.sha256
-  - cross/render-linux-386
-  - cross/render-linux-386.md5
-  - cross/render-linux-386.sha256
-  - cross/render-windows-amd64
-  - cross/render-windows-amd64.md5
-  - cross/render-windows-amd64.sha256
-  - cross/render-windows-386
-  - cross/render-windows-386.md5
-  - cross/render-windows-386.sha256
+  - provider: script
+    skip_cleanup: true
+    script:
+      - make -e docker-login docker-push
+    on:
+      repo: VirtusLab/cloud-file-server
+      tags: true
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: ZY9/g/g1EWJzCxh90Vy1EijhJz+2i+nxw0v7A4Hq00DCcx4SJAOzVQrWwD+pzp8qElzSNdjRj1hLzJutNlHV4B/uRXop0N6gMix9XldglBPWIrDPUxyil2TCNMZ6Ht3j9xO+HQRDRw+Yo2PWpfeuDa7mrnItfOK6gluO8R39FeD+Ye2rHrvWMaOt5VVFBVewT29Suee1LUCadB3m9UoLD1lqsuTYrp5Ceb73yBBrjYl0cpcrnjH6pIIALyVxLnab9pM+nqwyJu9JoWWxb4Rp0cPRdyNF1+fprixka20d59cJUtkJpvIZj971UCBPkgmtSS83oZok2PpKcNUB4xc81klmw7Rd5e4FzO9bw1GwOI3PMhTT21/bOCOORLdIsFLeTviRQBSd3xQxg3mn3DKs/jedfjqnjT8lOg4XDPqri0y1zyL1jnwme865ArdWW8QiFp2pzb9PZsN6E8PRQA9/MAo63nYCxc8PMWoaGpHmdo8Vja/5JmyPi8tcOIzwCzGKXqWehY9eVV4Y5rNby7qjEbCBCTY7lJtjko92wmVkI/h59mHGbYebu7Xw8PMKkHtwG//fGjC7KpAEuN18kq8N79n5KS2usECABhJBUKUUguDkgcrtE46snXFHekr6lSBhXoVcppqn0pOC1Wob9U9yD3VFe2GOB0gyMd/F3g3DZMg=
+    on:
+      repo: VirtusLab/cloud-file-server
+      tags: true
+    file:
+      - cross/render-darwin-amd64
+      - cross/render-darwin-amd64.md5
+      - cross/render-darwin-amd64.sha256
+      - cross/render-darwin-386
+      - cross/render-darwin-386.md5
+      - cross/render-darwin-386.sha256
+      - cross/render-freebsd-amd64
+      - cross/render-freebsd-amd64.md5
+      - cross/render-freebsd-amd64.sha256
+      - cross/render-freebsd-386
+      - cross/render-freebsd-386.md5
+      - cross/render-freebsd-386.sha256
+      - cross/render-linux-arm
+      - cross/render-linux-arm.md5
+      - cross/render-linux-arm.sha256
+      - cross/render-linux-arm64
+      - cross/render-linux-arm64.md5
+      - cross/render-linux-arm64.sha256
+      - cross/render-linux-amd64
+      - cross/render-linux-amd64.md5
+      - cross/render-linux-amd64.sha256
+      - cross/render-linux-386
+      - cross/render-linux-386.md5
+      - cross/render-linux-386.sha256
+      - cross/render-windows-amd64
+      - cross/render-windows-amd64.md5
+      - cross/render-windows-amd64.sha256
+      - cross/render-windows-386
+      - cross/render-windows-386.md5
+      - cross/render-windows-386.sha256
 
 cache:
   directories:
-    - vendor
+    - $HOME/.cache/go-build
+    - $GOPATH/pkg/mod
