@@ -1,0 +1,101 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cloud-file-server
+  namespace: test
+  labels:
+    app: cloud-file-server
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: web
+    protocol: TCP
+  selector:
+    app: cloud-file-server
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: cloud-file-server
+  namespace: test
+  labels:
+    app: cloud-file-server
+data:
+  config.yaml: |
+    listen: :8080
+    logRequests: true
+    connectors:
+    - type: file
+      uri: file:///opt/test.txt
+      pathPrefix: /health
+  test.txt: |
+    I'm testy tester, being tested ;-)
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cloud-file-server
+  namespace: test
+  labels:
+    app: cloud-file-server
+    version: v0.0.7
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-file-server
+  template:
+    metadata:
+      labels:
+        app: cloud-file-server
+        version: v0.0.7
+    spec:
+      containers:
+      - name: cloud-file-server
+        image: quay.io/virtuslab/cloud-file-server:v0.0.7
+        command:
+        - cloud-file-server
+        args:
+        - --config
+        - /opt/config.yaml
+        ports:
+        - name: web
+          containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health/test.txt
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /health/test.txt
+            port: 8080
+        volumeMounts:
+        - name: config
+          mountPath: /opt/
+          readOnly: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 10Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+      volumes:
+      - name: config
+        configMap:
+          name: cloud-file-server
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - cloud-file-server
